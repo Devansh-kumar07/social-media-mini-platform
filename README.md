@@ -1,1 +1,0 @@
-# Social Media Mini Platform
