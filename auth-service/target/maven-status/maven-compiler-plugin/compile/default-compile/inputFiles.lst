@@ -1,0 +1,11 @@
+C:\Users\kumar\OneDrive\Documents\SocialMediaMiniAppliccation\auth-service\src\main\java\com\connectsphere\auth\AuthServiceApplication.java
+C:\Users\kumar\OneDrive\Documents\SocialMediaMiniAppliccation\auth-service\src\main\java\com\connectsphere\auth\config\SecurityConfig.java
+C:\Users\kumar\OneDrive\Documents\SocialMediaMiniAppliccation\auth-service\src\main\java\com\connectsphere\auth\dto\RegisterRequest.java
+C:\Users\kumar\OneDrive\Documents\SocialMediaMiniAppliccation\auth-service\src\main\java\com\connectsphere\auth\dto\UserResponse.java
+C:\Users\kumar\OneDrive\Documents\SocialMediaMiniAppliccation\auth-service\src\main\java\com\connectsphere\auth\model\AuthProvider.java
+C:\Users\kumar\OneDrive\Documents\SocialMediaMiniAppliccation\auth-service\src\main\java\com\connectsphere\auth\model\User.java
+C:\Users\kumar\OneDrive\Documents\SocialMediaMiniAppliccation\auth-service\src\main\java\com\connectsphere\auth\model\UserRole.java
+C:\Users\kumar\OneDrive\Documents\SocialMediaMiniAppliccation\auth-service\src\main\java\com\connectsphere\auth\repository\UserRepository.java
+C:\Users\kumar\OneDrive\Documents\SocialMediaMiniAppliccation\auth-service\src\main\java\com\connectsphere\auth\resource\AuthResource.java
+C:\Users\kumar\OneDrive\Documents\SocialMediaMiniAppliccation\auth-service\src\main\java\com\connectsphere\auth\service\AuthService.java
+C:\Users\kumar\OneDrive\Documents\SocialMediaMiniAppliccation\auth-service\src\main\java\com\connectsphere\auth\service\AuthServiceImpl.java

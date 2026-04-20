@@ -1,0 +1,11 @@
+com\connectsphere\auth\model\AuthProvider.class
+com\connectsphere\auth\service\AuthServiceImpl.class
+com\connectsphere\auth\config\SecurityConfig.class
+com\connectsphere\auth\model\UserRole.class
+com\connectsphere\auth\AuthServiceApplication.class
+com\connectsphere\auth\model\User.class
+com\connectsphere\auth\dto\UserResponse.class
+com\connectsphere\auth\service\AuthService.class
+com\connectsphere\auth\resource\AuthResource.class
+com\connectsphere\auth\dto\RegisterRequest.class
+com\connectsphere\auth\repository\UserRepository.class
