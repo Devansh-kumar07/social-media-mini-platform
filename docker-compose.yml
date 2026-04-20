@@ -1,0 +1,76 @@
+services:
+  auth-db:
+    image: mysql:8.4
+    container_name: connectsphere-auth-db
+    environment:
+      MYSQL_DATABASE: connectsphere_auth
+      MYSQL_USER: auth_user
+      MYSQL_PASSWORD: auth_pass
+      MYSQL_ROOT_PASSWORD: root_pass
+    ports:
+      - "3307:3306"
+    volumes:
+      - auth-db-data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-proot_pass"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+  rabbitmq:
+    image: rabbitmq:3.13-management
+    container_name: connectsphere-rabbitmq
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+
+  eureka-server:
+    build:
+      context: .
+      dockerfile: eureka-server/Dockerfile
+    container_name: connectsphere-eureka
+    ports:
+      - "8761:8761"
+
+  auth-service:
+    build:
+      context: .
+      dockerfile: auth-service/Dockerfile
+    container_name: connectsphere-auth-service
+    depends_on:
+      auth-db:
+        condition: service_healthy
+      eureka-server:
+        condition: service_started
+    environment:
+      SERVER_PORT: 8081
+      SPRING_DATASOURCE_URL: jdbc:mysql://auth-db:3306/connectsphere_auth?createDatabaseIfNotExist=true&useSSL=false&allowPublicKeyRetrieval=true
+      SPRING_DATASOURCE_USERNAME: auth_user
+      SPRING_DATASOURCE_PASSWORD: auth_pass
+      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://eureka-server:8761/eureka/
+      EUREKA_INSTANCE_HOSTNAME: auth-service
+      GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID:-local-dev-google-client-id}
+      GOOGLE_CLIENT_SECRET: ${GOOGLE_CLIENT_SECRET:-local-dev-google-client-secret}
+      JWT_SECRET: ${JWT_SECRET:-change-this-local-dev-secret}
+    ports:
+      - "8081:8081"
+
+  api-gateway:
+    build:
+      context: .
+      dockerfile: api-gateway/Dockerfile
+    container_name: connectsphere-api-gateway
+    depends_on:
+      eureka-server:
+        condition: service_started
+      auth-service:
+        condition: service_started
+    environment:
+      SERVER_PORT: 8080
+      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://eureka-server:8761/eureka/
+      EUREKA_INSTANCE_HOSTNAME: api-gateway
+    ports:
+      - "8080:8080"
+
+volumes:
+  auth-db-data:

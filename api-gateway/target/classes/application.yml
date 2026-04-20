@@ -17,13 +17,20 @@ spring:
             - Path=/api/v1/auth/**
 
 eureka:
+  instance:
+    hostname: ${EUREKA_INSTANCE_HOSTNAME:localhost}
+    instance-id: ${spring.application.name}:${server.port}
+    non-secure-port: ${SERVER_PORT:8080}
+    prefer-ip-address: false
+    home-page-url: http://${eureka.instance.hostname}:${server.port}/
+    status-page-url: http://${eureka.instance.hostname}:${server.port}/actuator/info
+    health-check-url: http://${eureka.instance.hostname}:${server.port}/actuator/health
   client:
     service-url:
-      defaultZone: http://connectsphere-eureka:8761/eureka
+      defaultZone: ${EUREKA_CLIENT_SERVICEURL_DEFAULTZONE:http://localhost:8761/eureka/}
 
 management:
   endpoints:
     web:
       exposure:
         include: health,info,gateway
-

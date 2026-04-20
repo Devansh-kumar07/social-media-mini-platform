@@ -1,0 +1,52 @@
+server:
+  port: ${SERVER_PORT:8081}
+
+spring:
+  application:
+    name: auth-service
+  datasource:
+    url: ${SPRING_DATASOURCE_URL:jdbc:mysql://localhost:3307/connectsphere_auth?createDatabaseIfNotExist=true&useSSL=false&allowPublicKeyRetrieval=true}
+    username: ${SPRING_DATASOURCE_USERNAME:auth_user}
+    password: ${SPRING_DATASOURCE_PASSWORD:auth_pass}
+  jpa:
+    hibernate:
+      ddl-auto: update
+    open-in-view: false
+    properties:
+      hibernate:
+        format_sql: true
+  security:
+    oauth2:
+      client:
+        registration:
+          google:
+            client-id: ${GOOGLE_CLIENT_ID:local-dev-google-client-id}
+            client-secret: ${GOOGLE_CLIENT_SECRET:local-dev-google-client-secret}
+            scope:
+              - openid
+              - profile
+              - email
+
+eureka:
+  instance:
+    hostname: ${EUREKA_INSTANCE_HOSTNAME:localhost}
+    instance-id: ${spring.application.name}:${server.port}
+    non-secure-port: ${SERVER_PORT:8081}
+    prefer-ip-address: false
+    home-page-url: http://${eureka.instance.hostname}:${server.port}/
+    status-page-url: http://${eureka.instance.hostname}:${server.port}/actuator/info
+    health-check-url: http://${eureka.instance.hostname}:${server.port}/actuator/health
+  client:
+    service-url:
+      defaultZone: ${EUREKA_CLIENT_SERVICEURL_DEFAULTZONE:http://localhost:8761/eureka/}
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
+
+connectsphere:
+  jwt:
+    secret: ${JWT_SECRET:change-this-local-dev-secret}
+    expiry-hours: 24
