@@ -1,4 +1,5 @@
 C:\Users\kumar\OneDrive\Documents\SocialMediaMiniAppliccation\auth-service\src\main\java\com\connectsphere\auth\AuthServiceApplication.java
+C:\Users\kumar\OneDrive\Documents\SocialMediaMiniAppliccation\auth-service\src\main\java\com\connectsphere\auth\config\OpenApiConfig.java
 C:\Users\kumar\OneDrive\Documents\SocialMediaMiniAppliccation\auth-service\src\main\java\com\connectsphere\auth\config\SecurityConfig.java
 C:\Users\kumar\OneDrive\Documents\SocialMediaMiniAppliccation\auth-service\src\main\java\com\connectsphere\auth\controller\AuthController.java
 C:\Users\kumar\OneDrive\Documents\SocialMediaMiniAppliccation\auth-service\src\main\java\com\connectsphere\auth\controller\GlobalExceptionHandler.java
@@ -16,6 +17,7 @@ C:\Users\kumar\OneDrive\Documents\SocialMediaMiniAppliccation\auth-service\src\m
 C:\Users\kumar\OneDrive\Documents\SocialMediaMiniAppliccation\auth-service\src\main\java\com\connectsphere\auth\model\UserRole.java
 C:\Users\kumar\OneDrive\Documents\SocialMediaMiniAppliccation\auth-service\src\main\java\com\connectsphere\auth\repository\UserRepository.java
 C:\Users\kumar\OneDrive\Documents\SocialMediaMiniAppliccation\auth-service\src\main\java\com\connectsphere\auth\security\JwtAuthenticationFilter.java
+C:\Users\kumar\OneDrive\Documents\SocialMediaMiniAppliccation\auth-service\src\main\java\com\connectsphere\auth\security\OAuth2LoginSuccessHandler.java
 C:\Users\kumar\OneDrive\Documents\SocialMediaMiniAppliccation\auth-service\src\main\java\com\connectsphere\auth\service\AuthService.java
 C:\Users\kumar\OneDrive\Documents\SocialMediaMiniAppliccation\auth-service\src\main\java\com\connectsphere\auth\service\AuthServiceImpl.java
 C:\Users\kumar\OneDrive\Documents\SocialMediaMiniAppliccation\auth-service\src\main\java\com\connectsphere\auth\service\JwtClaims.java

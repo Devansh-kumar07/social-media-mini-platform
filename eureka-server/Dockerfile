@@ -4,6 +4,7 @@ COPY pom.xml .
 COPY eureka-server/pom.xml eureka-server/pom.xml
 COPY api-gateway/pom.xml api-gateway/pom.xml
 COPY auth-service/pom.xml auth-service/pom.xml
+COPY connectsphere-service/pom.xml connectsphere-service/pom.xml
 RUN mvn -pl eureka-server -am dependency:go-offline
 COPY . .
 RUN mvn -pl eureka-server -am package -DskipTests

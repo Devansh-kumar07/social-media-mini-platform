@@ -1,11 +1,11 @@
 package com.connectsphere.auth.config;
 
 import com.connectsphere.auth.security.JwtAuthenticationFilter;
+import com.connectsphere.auth.security.OAuth2LoginSuccessHandler;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.annotation.Order;
-import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -46,14 +46,24 @@ public class SecurityConfig {
 
     @Bean
     @Order(2)
-    SecurityFilterChain browserSecurityFilterChain(HttpSecurity http) throws Exception {
+    SecurityFilterChain browserSecurityFilterChain(
+            HttpSecurity http,
+            OAuth2LoginSuccessHandler oauth2LoginSuccessHandler
+    ) throws Exception {
         http
                 .csrf(csrf -> csrf.disable())
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/oauth2/**", "/login/oauth2/**").permitAll()
+                        .requestMatchers(
+                                "/oauth2/**",
+                                "/login/oauth2/**",
+                                "/v3/api-docs",
+                                "/v3/api-docs/**",
+                                "/swagger-ui.html",
+                                "/swagger-ui/**"
+                        ).permitAll()
                         .anyRequest().permitAll()
                 )
-                .oauth2Login(Customizer.withDefaults());
+                .oauth2Login(oauth -> oauth.successHandler(oauth2LoginSuccessHandler));
 
         return http.build();
     }

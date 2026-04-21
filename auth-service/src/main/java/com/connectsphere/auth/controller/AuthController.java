@@ -9,6 +9,8 @@ import com.connectsphere.auth.dto.TokenValidationResponse;
 import com.connectsphere.auth.dto.UpdateProfileRequest;
 import com.connectsphere.auth.dto.UserResponse;
 import com.connectsphere.auth.service.AuthService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import jakarta.validation.Valid;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -35,42 +37,50 @@ public class AuthController {
     }
 
     @GetMapping("/health")
+    @Operation(summary = "Check auth service health")
     public String health() {
         return "auth-service is running";
     }
 
     @PostMapping("/register")
     @ResponseStatus(HttpStatus.CREATED)
+    @Operation(summary = "Register a new user")
     public UserResponse register(@Valid @RequestBody RegisterRequest request) {
         return authService.register(request);
     }
 
     @PostMapping("/login")
+    @Operation(summary = "Login with email and password")
     public AuthResponse login(@Valid @RequestBody LoginRequest request) {
         return authService.login(request);
     }
 
     @PostMapping("/validate")
+    @Operation(summary = "Validate an access token")
     public TokenValidationResponse validateToken(@Valid @RequestBody TokenValidationRequest request) {
         return authService.validateToken(request.token());
     }
 
     @GetMapping("/users/{userId}")
+    @Operation(summary = "Get user by id")
     public UserResponse getUser(@PathVariable Long userId) {
         return authService.getUser(userId);
     }
 
     @GetMapping("/search")
+    @Operation(summary = "Search users")
     public Page<UserResponse> searchUsers(@RequestParam(defaultValue = "") String q, Pageable pageable) {
         return authService.searchUsers(q, pageable);
     }
 
     @GetMapping("/profile")
+    @Operation(summary = "Get logged in user profile", security = @SecurityRequirement(name = "bearer-jwt"))
     public UserResponse profile(Authentication authentication) {
         return authService.getUser(currentUserId(authentication));
     }
 
     @PutMapping("/profile")
+    @Operation(summary = "Update logged in user profile", security = @SecurityRequirement(name = "bearer-jwt"))
     public UserResponse updateProfile(
             Authentication authentication,
             @Valid @RequestBody UpdateProfileRequest request
@@ -80,6 +90,7 @@ public class AuthController {
 
     @PutMapping("/password")
     @ResponseStatus(HttpStatus.NO_CONTENT)
+    @Operation(summary = "Change logged in user password", security = @SecurityRequirement(name = "bearer-jwt"))
     public void changePassword(
             Authentication authentication,
             @Valid @RequestBody ChangePasswordRequest request
@@ -89,6 +100,7 @@ public class AuthController {
 
     @DeleteMapping("/deactivate")
     @ResponseStatus(HttpStatus.NO_CONTENT)
+    @Operation(summary = "Deactivate logged in user account", security = @SecurityRequirement(name = "bearer-jwt"))
     public void deactivateAccount(Authentication authentication) {
         authService.deactivateAccount(currentUserId(authentication));
     }
@@ -97,4 +109,3 @@ public class AuthController {
         return (Long) authentication.getPrincipal();
     }
 }
-

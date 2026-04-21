@@ -46,6 +46,12 @@ management:
       exposure:
         include: health,info
 
+springdoc:
+  api-docs:
+    path: /v3/api-docs
+  swagger-ui:
+    path: /swagger-ui.html
+
 connectsphere:
   jwt:
     secret: ${JWT_SECRET:change-this-local-dev-secret}
