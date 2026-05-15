@@ -16,6 +16,8 @@ import org.springframework.web.filter.OncePerRequestFilter;
 
 @Component
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
+	// OncePerRequestFilter guarantee karta hai ye filter ek request pe
+	// sirf ONCE run hoga, chahe Spring internally redirect kare ya nahi
     private final JwtService jwtService;
 
     public JwtAuthenticationFilter(JwtService jwtService) {
@@ -29,21 +31,28 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             FilterChain filterChain
     ) throws ServletException, IOException {
         String authorization = request.getHeader("Authorization");
-
+        // "Bearer eyJhbGci..."
         if (authorization != null && authorization.startsWith("Bearer ")) {
             String token = authorization.substring(7);
             jwtService.validateToken(token).ifPresent(claims -> {
                 UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(
                         claims.userId(),
-                        null,
+                        null, // ← credentials (password nahi chahiye ab)
                         List.of(new SimpleGrantedAuthority("ROLE_" + claims.role()))
                 );
                 authentication.setDetails(claims);
+                // ↑ puri JwtClaims object details mein store karo
+                // controller mein zaroorat pade toh nikal sako
                 SecurityContextHolder.getContext().setAuthentication(authentication);
+                // ↑ Spring ko bata do: "ye request authenticated hai"
+                // is thread ke liye valid rahega
             });
         }
 
         filterChain.doFilter(request, response);
+        // ↑ CRITICAL: ye line hamesha call karni padti hai
+        // agar nahi kiya toh request yahan RUKH JAAYEGI
+        // chahe token valid ho ya na ho
     }
 }
 

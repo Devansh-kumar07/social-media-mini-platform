@@ -18,8 +18,8 @@ import org.springframework.stereotype.Service;
 @Service
 public class JwtService {
     private static final String HMAC_ALGORITHM = "HmacSHA256";
-    private final ObjectMapper objectMapper;
-    private final String secret;
+    private final ObjectMapper objectMapper;// JSON ↔ Map conversion
+    private final String secret; // app.yml se aata hai: "mySecretKey123"
     private final long expiryHours;
 
     public JwtService(
@@ -61,7 +61,11 @@ public class JwtService {
             if (parts.length != 3) {
                 return Optional.empty();
             }
-
+         // constantTimeEquals kyun? 
+         // Normal .equals() string compare karta hai character by character
+         // aur jald hi return karta hai jab mismatch milta hai.
+         // Timing attack: attacker measure kar sakta hai kitna time laga,
+         // aur guess kar sakta hai signature ka prefix.
             String expectedSignature = sign(parts[0] + "." + parts[1]);
             if (!constantTimeEquals(expectedSignature, parts[2])) {
                 return Optional.empty();
@@ -78,6 +82,7 @@ public class JwtService {
                 return Optional.empty();
             }
 
+         // Step 3: Claims extract karo
             return Optional.of(new JwtClaims(
                     ((Number) payload.get("sub")).longValue(),
                     (String) payload.get("email"),

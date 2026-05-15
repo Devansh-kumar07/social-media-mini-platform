@@ -4,6 +4,10 @@ server:
 spring:
   application:
     name: auth-service
+  servlet:
+    multipart:
+      max-file-size: 100MB
+      max-request-size: 120MB
   datasource:
     url: ${SPRING_DATASOURCE_URL:jdbc:mysql://localhost:3307/connectsphere_auth?createDatabaseIfNotExist=true&useSSL=false&allowPublicKeyRetrieval=true}
     username: ${SPRING_DATASOURCE_USERNAME:auth_user}
@@ -22,10 +26,29 @@ spring:
           google:
             client-id: ${GOOGLE_CLIENT_ID:local-dev-google-client-id}
             client-secret: ${GOOGLE_CLIENT_SECRET:local-dev-google-client-secret}
+            redirect-uri: ${GOOGLE_REDIRECT_URI:http://localhost:8080/login/oauth2/code/google}
             scope:
               - openid
               - profile
               - email
+  mail:
+    host: ${SPRING_MAIL_HOST:smtp.gmail.com}
+    port: ${SPRING_MAIL_PORT:587}
+    username: ${SPRING_MAIL_USERNAME:}
+    password: ${SPRING_MAIL_PASSWORD:}
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+  data:
+    redis:
+      host: ${SPRING_DATA_REDIS_HOST:localhost}
+      port: ${SPRING_DATA_REDIS_PORT:6379}
+      timeout: ${SPRING_DATA_REDIS_TIMEOUT:2s}
+      repositories:
+        enabled: false
 
 eureka:
   instance:
@@ -56,3 +79,23 @@ connectsphere:
   jwt:
     secret: ${JWT_SECRET:change-this-local-dev-secret}
     expiry-hours: 24
+  admin:
+    bootstrap:
+      enabled: ${ADMIN_BOOTSTRAP_ENABLED:true}
+      email: ${ADMIN_BOOTSTRAP_EMAIL:admin@connectsphere.local}
+      username: ${ADMIN_BOOTSTRAP_USERNAME:admin}
+      password: ${ADMIN_BOOTSTRAP_PASSWORD:Admin@12345}
+      full-name: ${ADMIN_BOOTSTRAP_FULL_NAME:ConnectSphere Admin}
+      sync-password-on-startup: ${ADMIN_BOOTSTRAP_SYNC_PASSWORD:true}
+  oauth2:
+    frontend-callback-url: ${OAUTH2_FRONTEND_CALLBACK_URL:http://localhost:4200/login}
+  mail:
+    from: ${CONNECTSPHERE_MAIL_FROM:${SPRING_MAIL_USERNAME:}}
+  auth:
+    reset-password:
+      frontend-url: ${RESET_PASSWORD_FRONTEND_URL:http://localhost:4200/reset-password}
+
+# URL for calling search-service when a new user registers
+services:
+  search-url: ${SEARCH_SERVICE_URL:http://localhost:8084}
+  media-url: ${MEDIA_SERVICE_URL:http://localhost:8083}

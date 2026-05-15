@@ -1,0 +1,6 @@
+com\connectsphere\social\dto\UploadedMediaResponse.class
+com\connectsphere\social\client\MediaServiceClient$1.class
+com\connectsphere\social\service\AdminModerationService.class
+com\connectsphere\social\client\AuthServiceClient.class
+com\connectsphere\social\client\MediaServiceClient.class
+com\connectsphere\social\dto\AuthUserResponse.class
