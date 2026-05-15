@@ -1,0 +1,54 @@
+server:
+  port: ${SERVER_PORT:8085}
+
+spring:
+  application:
+    name: notification-service
+  datasource:
+    url: ${SPRING_DATASOURCE_URL:jdbc:mysql://localhost:3311/connectsphere_notifications?createDatabaseIfNotExist=true&useSSL=false&allowPublicKeyRetrieval=true}
+    username: ${SPRING_DATASOURCE_USERNAME:notif_user}
+    password: ${SPRING_DATASOURCE_PASSWORD:notif_pass}
+    driver-class-name: com.mysql.cj.jdbc.Driver
+  jpa:
+    hibernate:
+      ddl-auto: update
+    open-in-view: false
+    properties:
+      hibernate:
+        format_sql: true
+  rabbitmq:
+    host: ${SPRING_RABBITMQ_HOST:localhost}
+    port: ${SPRING_RABBITMQ_PORT:5672}
+    username: ${SPRING_RABBITMQ_USERNAME:guest}
+    password: ${SPRING_RABBITMQ_PASSWORD:guest}
+
+eureka:
+  instance:
+    hostname: ${EUREKA_INSTANCE_HOSTNAME:localhost}
+    instance-id: ${spring.application.name}:${server.port}
+    non-secure-port: ${SERVER_PORT:8085}
+    prefer-ip-address: false
+    home-page-url: http://${eureka.instance.hostname}:${server.port}/
+    status-page-url: http://${eureka.instance.hostname}:${server.port}/actuator/info
+    health-check-url: http://${eureka.instance.hostname}:${server.port}/actuator/health
+  client:
+    service-url:
+      defaultZone: ${EUREKA_CLIENT_SERVICEURL_DEFAULTZONE:http://localhost:8761/eureka/}
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
+
+springdoc:
+  api-docs:
+    path: /v3/api-docs
+  swagger-ui:
+    path: /swagger-ui.html
+
+connectsphere:
+  rabbitmq:
+    notification-exchange: ${CONNECTSPHERE_NOTIFICATION_EXCHANGE:connectsphere.notification.exchange}
+    notification-queue: ${CONNECTSPHERE_NOTIFICATION_QUEUE:connectsphere.notification.queue}
+    notification-routing-key: ${CONNECTSPHERE_NOTIFICATION_ROUTING_KEY:connectsphere.notification.created}
