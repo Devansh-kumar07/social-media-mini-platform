@@ -1,16 +1,21 @@
 package com.connectsphere.social.model;
 
 import jakarta.persistence.Column;
+import jakarta.persistence.CollectionTable;
+import jakarta.persistence.ElementCollection;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
 import jakarta.persistence.PrePersist;
 import jakarta.persistence.PreUpdate;
 import jakarta.persistence.Table;
 import java.time.Instant;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Table(name = "posts")
@@ -22,8 +27,13 @@ public class Post {
     @Column(nullable = false)
     private Long authorId;
 
-    @Column(nullable = false, length = 2000)
+    @Column(length = 2000)
     private String content;
+
+    @ElementCollection
+    @CollectionTable(name = "post_media_urls", joinColumns = @JoinColumn(name = "post_id"))
+    @Column(name = "media_url", length = 500)
+    private List<String> mediaUrls = new ArrayList<>();
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 30)
@@ -34,6 +44,9 @@ public class Post {
 
     @Column(nullable = false)
     private long commentsCount;
+
+    @Column(nullable = false)
+    private long sharesCount;
 
     @Column(nullable = false)
     private boolean deleted;
@@ -80,6 +93,14 @@ public class Post {
         this.content = content;
     }
 
+    public List<String> getMediaUrls() {
+        return mediaUrls;
+    }
+
+    public void setMediaUrls(List<String> mediaUrls) {
+        this.mediaUrls = mediaUrls == null ? new ArrayList<>() : new ArrayList<>(mediaUrls);
+    }
+
     public PostVisibility getVisibility() {
         return visibility;
     }
@@ -104,6 +125,14 @@ public class Post {
         this.commentsCount = commentsCount;
     }
 
+    public long getSharesCount() {
+        return sharesCount;
+    }
+
+    public void setSharesCount(long sharesCount) {
+        this.sharesCount = sharesCount;
+    }
+
     public boolean isDeleted() {
         return deleted;
     }
@@ -120,4 +149,3 @@ public class Post {
         return updatedAt;
     }
 }
-

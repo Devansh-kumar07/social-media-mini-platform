@@ -1,4 +1,6 @@
 services:
+  # ─── DATABASES ───────────────────────────────────────────────────────────────
+
   auth-db:
     image: mysql:8.4
     container_name: connectsphere-auth-db
@@ -17,6 +19,78 @@ services:
       timeout: 5s
       retries: 10
 
+  connectsphere-db:
+    image: mysql:8.4
+    container_name: connectsphere-post-db
+    environment:
+      MYSQL_DATABASE: connectsphere_posts
+      MYSQL_USER: post_user
+      MYSQL_PASSWORD: post_pass
+      MYSQL_ROOT_PASSWORD: root_pass
+    ports:
+      - "3308:3306"
+    volumes:
+      - connectsphere-db-data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-proot_pass"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+  media-db:
+    image: mysql:8.4
+    container_name: connectsphere-media-db
+    environment:
+      MYSQL_DATABASE: connectsphere_media
+      MYSQL_USER: media_user
+      MYSQL_PASSWORD: media_pass
+      MYSQL_ROOT_PASSWORD: root_pass
+    ports:
+      - "3309:3306"
+    volumes:
+      - media-db-data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-proot_pass"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+  search-db:
+    image: mysql:8.4
+    container_name: connectsphere-search-db
+    environment:
+      MYSQL_DATABASE: connectsphere_search
+      MYSQL_USER: search_user
+      MYSQL_PASSWORD: search_pass
+      MYSQL_ROOT_PASSWORD: root_pass
+    ports:
+      - "3310:3306"
+    volumes:
+      - search-db-data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-proot_pass"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+  notification-db:
+    image: mysql:8.4
+    container_name: connectsphere-notification-db
+    environment:
+      MYSQL_DATABASE: connectsphere_notifications
+      MYSQL_USER: notif_user
+      MYSQL_PASSWORD: notif_pass
+      MYSQL_ROOT_PASSWORD: root_pass
+    ports:
+      - "3311:3306"
+    volumes:
+      - notification-db-data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-proot_pass"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
   rabbitmq:
     image: rabbitmq:3.13-management
     container_name: connectsphere-rabbitmq
@@ -24,7 +98,18 @@ services:
       - "5672:5672"
       - "15672:15672"
 
+  redis:
+    image: redis:7.4-alpine
+    container_name: connectsphere-redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis-data:/data
+
+  # ─── SERVICES ────────────────────────────────────────────────────────────────
+
   eureka-server:
+    profiles: ["app"]
     build:
       context: .
       dockerfile: eureka-server/Dockerfile
@@ -33,6 +118,7 @@ services:
       - "8761:8761"
 
   auth-service:
+    profiles: ["app"]
     build:
       context: .
       dockerfile: auth-service/Dockerfile
@@ -42,20 +128,117 @@ services:
         condition: service_healthy
       eureka-server:
         condition: service_started
+      redis:
+        condition: service_started
     environment:
       SERVER_PORT: 8081
       SPRING_DATASOURCE_URL: jdbc:mysql://auth-db:3306/connectsphere_auth?createDatabaseIfNotExist=true&useSSL=false&allowPublicKeyRetrieval=true
       SPRING_DATASOURCE_USERNAME: auth_user
       SPRING_DATASOURCE_PASSWORD: auth_pass
+      SPRING_DATA_REDIS_HOST: redis
+      SPRING_DATA_REDIS_PORT: 6379
       EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://eureka-server:8761/eureka/
       EUREKA_INSTANCE_HOSTNAME: auth-service
+      SEARCH_SERVICE_URL: http://search-service:8084
+      MEDIA_SERVICE_URL: http://media-service:8083
       GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID:-local-dev-google-client-id}
       GOOGLE_CLIENT_SECRET: ${GOOGLE_CLIENT_SECRET:-local-dev-google-client-secret}
+      OAUTH2_FRONTEND_CALLBACK_URL: ${OAUTH2_FRONTEND_CALLBACK_URL:-http://localhost:4200/login}
       JWT_SECRET: ${JWT_SECRET:-change-this-local-dev-secret}
     ports:
       - "8081:8081"
 
+  connectsphere-service:
+    profiles: ["app"]
+    build:
+      context: .
+      dockerfile: connectsphere-service/Dockerfile
+    container_name: connectsphere-service
+    depends_on:
+      connectsphere-db:
+        condition: service_healthy
+      eureka-server:
+        condition: service_started
+    environment:
+      SERVER_PORT: 8082
+      SPRING_DATASOURCE_URL: jdbc:mysql://connectsphere-db:3306/connectsphere_posts?createDatabaseIfNotExist=true&useSSL=false&allowPublicKeyRetrieval=true
+      SPRING_DATASOURCE_USERNAME: post_user
+      SPRING_DATASOURCE_PASSWORD: post_pass
+      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://eureka-server:8761/eureka/
+      EUREKA_INSTANCE_HOSTNAME: connectsphere-service
+    ports:
+      - "8082:8082"
+
+  media-service:
+    profiles: ["app"]
+    build:
+      context: .
+      dockerfile: media-service/Dockerfile
+    container_name: connectsphere-media-service
+    depends_on:
+      media-db:
+        condition: service_healthy
+      eureka-server:
+        condition: service_started
+    environment:
+      SERVER_PORT: 8083
+      SPRING_DATASOURCE_URL: jdbc:mysql://media-db:3306/connectsphere_media?createDatabaseIfNotExist=true&useSSL=false&allowPublicKeyRetrieval=true
+      SPRING_DATASOURCE_USERNAME: media_user
+      SPRING_DATASOURCE_PASSWORD: media_pass
+      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://eureka-server:8761/eureka/
+      EUREKA_INSTANCE_HOSTNAME: media-service
+      MEDIA_STORAGE_PATH: /data/media
+    ports:
+      - "8083:8083"
+    volumes:
+      - media-data:/data/media
+
+  search-service:
+    profiles: ["app"]
+    build:
+      context: .
+      dockerfile: search-service/Dockerfile
+    container_name: connectsphere-search-service
+    depends_on:
+      search-db:
+        condition: service_healthy
+      eureka-server:
+        condition: service_started
+    environment:
+      SERVER_PORT: 8084
+      SPRING_DATASOURCE_URL: jdbc:mysql://search-db:3306/connectsphere_search?createDatabaseIfNotExist=true&useSSL=false&allowPublicKeyRetrieval=true
+      SPRING_DATASOURCE_USERNAME: search_user
+      SPRING_DATASOURCE_PASSWORD: search_pass
+      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://eureka-server:8761/eureka/
+      EUREKA_INSTANCE_HOSTNAME: search-service
+    ports:
+      - "8084:8084"
+
+  notification-service:
+    profiles: ["app"]
+    build:
+      context: .
+      dockerfile: notification-service/Dockerfile
+    container_name: connectsphere-notification-service
+    depends_on:
+      notification-db:
+        condition: service_healthy
+      eureka-server:
+        condition: service_started
+      rabbitmq:
+        condition: service_started
+    environment:
+      SERVER_PORT: 8085
+      SPRING_DATASOURCE_URL: jdbc:mysql://notification-db:3306/connectsphere_notifications?createDatabaseIfNotExist=true&useSSL=false&allowPublicKeyRetrieval=true
+      SPRING_DATASOURCE_USERNAME: notif_user
+      SPRING_DATASOURCE_PASSWORD: notif_pass
+      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://eureka-server:8761/eureka/
+      EUREKA_INSTANCE_HOSTNAME: notification-service
+    ports:
+      - "8085:8085"
+
   api-gateway:
+    profiles: ["app"]
     build:
       context: .
       dockerfile: api-gateway/Dockerfile
@@ -74,3 +257,9 @@ services:
 
 volumes:
   auth-db-data:
+  connectsphere-db-data:
+  media-db-data:
+  search-db-data:
+  notification-db-data:
+  media-data:
+  redis-data:

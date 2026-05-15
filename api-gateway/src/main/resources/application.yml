@@ -4,27 +4,71 @@ server:
 spring:
   application:
     name: api-gateway
+  codec:
+    max-in-memory-size: 100MB
   cloud:
     gateway:
+      globalcors:
+        add-to-simple-url-handler-mapping: true   
+        cors-configurations:
+          '[/**]':
+            allowedOriginPatterns:
+              - ${GATEWAY_ALLOWED_ORIGIN:http://localhost:4200}
+            allowedMethods:
+              - GET
+              - POST
+              - PUT
+              - DELETE
+              - OPTIONS
+              - PATCH
+            allowedHeaders:
+              - "*"
+            allowCredentials: true
+            maxAge: 3600
+
       discovery:
         locator:
           enabled: true
           lower-case-service-id: true
+
       routes:
         - id: auth-service
           uri: lb://auth-service
           predicates:
             - Path=/api/v1/auth/**
+
+        - id: auth-service-oauth
+          uri: lb://auth-service
+          predicates:
+            - Path=/oauth2/**,/login/oauth2/**
+
         - id: auth-service-docs
           uri: lb://auth-service
           predicates:
             - Path=/v3/api-docs/auth-service
           filters:
             - SetPath=/v3/api-docs
+
         - id: connectsphere-service
           uri: lb://connectsphere-service
           predicates:
-            - Path=/api/v1/posts/**
+            - Path=/api/v1/posts/**,/api/v1/comments/**,/api/v1/reactions/**,/api/v1/follows/**,/api/v1/reports/**
+
+        - id: media-service
+          uri: lb://media-service
+          predicates:
+            - Path=/api/v1/media/**
+
+        - id: search-service
+          uri: lb://search-service
+          predicates:
+            - Path=/api/v1/search/**
+
+        - id: notification-service
+          uri: lb://notification-service
+          predicates:
+            - Path=/api/v1/notifications/**
+
         - id: connectsphere-service-docs
           uri: lb://connectsphere-service
           predicates:
@@ -32,32 +76,23 @@ spring:
           filters:
             - SetPath=/v3/api-docs
 
-eureka:
-  instance:
-    hostname: ${EUREKA_INSTANCE_HOSTNAME:localhost}
-    instance-id: ${spring.application.name}:${server.port}
-    non-secure-port: ${SERVER_PORT:8080}
-    prefer-ip-address: false
-    home-page-url: http://${eureka.instance.hostname}:${server.port}/
-    status-page-url: http://${eureka.instance.hostname}:${server.port}/actuator/info
-    health-check-url: http://${eureka.instance.hostname}:${server.port}/actuator/health
-  client:
-    service-url:
-      defaultZone: ${EUREKA_CLIENT_SERVICEURL_DEFAULTZONE:http://localhost:8761/eureka/}
+        - id: media-service-docs
+          uri: lb://media-service
+          predicates:
+            - Path=/v3/api-docs/media-service
+          filters:
+            - SetPath=/v3/api-docs
 
-management:
-  endpoints:
-    web:
-      exposure:
-        include: health,info,gateway
+        - id: search-service-docs
+          uri: lb://search-service
+          predicates:
+            - Path=/v3/api-docs/search-service
+          filters:
+            - SetPath=/v3/api-docs
 
-springdoc:
-  api-docs:
-    path: /v3/api-docs
-  swagger-ui:
-    path: /swagger-ui.html
-    urls:
-      - name: auth-service
-        url: /v3/api-docs/auth-service
-      - name: connectsphere-service
-        url: /v3/api-docs/connectsphere-service
+        - id: notification-service-docs
+          uri: lb://notification-service
+          predicates:
+            - Path=/v3/api-docs/notification-service
+          filters:
+            - SetPath=/v3/api-docs

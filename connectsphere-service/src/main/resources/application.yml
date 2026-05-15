@@ -4,6 +4,10 @@ server:
 spring:
   application:
     name: connectsphere-service
+  servlet:
+    multipart:
+      max-file-size: 100MB
+      max-request-size: 120MB
   datasource:
     url: ${SPRING_DATASOURCE_URL:jdbc:mysql://localhost:3308/connectsphere_posts?createDatabaseIfNotExist=true&useSSL=false&allowPublicKeyRetrieval=true}
     username: ${SPRING_DATASOURCE_USERNAME:post_user}
@@ -15,6 +19,11 @@ spring:
     properties:
       hibernate:
         format_sql: true
+  rabbitmq:
+    host: ${SPRING_RABBITMQ_HOST:localhost}
+    port: ${SPRING_RABBITMQ_PORT:5672}
+    username: ${SPRING_RABBITMQ_USERNAME:guest}
+    password: ${SPRING_RABBITMQ_PASSWORD:guest}
 
 eureka:
   instance:
@@ -40,3 +49,18 @@ springdoc:
     path: /v3/api-docs
   swagger-ui:
     path: /swagger-ui.html
+
+# URLs for calling other microservices
+# These use Eureka service names (http://service-name) when running with Docker
+# In local dev without Eureka, replace with actual URLs like http://localhost:8084
+services:
+  auth-url: ${AUTH_SERVICE_URL:http://localhost:8081}
+  media-url: ${MEDIA_SERVICE_URL:http://localhost:8083}
+  search-url: ${SEARCH_SERVICE_URL:http://localhost:8084}
+  notification-url: ${NOTIFICATION_SERVICE_URL:http://localhost:8085}
+
+connectsphere:
+  rabbitmq:
+    notification-exchange: ${CONNECTSPHERE_NOTIFICATION_EXCHANGE:connectsphere.notification.exchange}
+    notification-queue: ${CONNECTSPHERE_NOTIFICATION_QUEUE:connectsphere.notification.queue}
+    notification-routing-key: ${CONNECTSPHERE_NOTIFICATION_ROUTING_KEY:connectsphere.notification.created}
